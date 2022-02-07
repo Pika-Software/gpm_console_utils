@@ -102,6 +102,17 @@ do
         return new
     end
 
+    local developer = (GetConVar( "developer" ):GetInt() or 0) > 0
+    cvars.AddChangeCallback( "developer", function( name, old, new )
+        developer = tonumber( new ) > 0
+    end, "Console Utils")
+
+    function console.devLog( ... )
+        if developer then
+            return console.log( ... )
+        end
+    end
+
     local getmetatable = getmetatable
     function isConsoleLog( any )
         return getmetatable( any ) == log

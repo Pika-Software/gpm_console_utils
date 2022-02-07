@@ -81,7 +81,7 @@ do
     end
 
     log["__split"] = "    "
-    function log:setSplit( any )
+    function log:setSeparator( any )
         self["__split"] = any or false
         return self
     end

@@ -11,6 +11,7 @@ function console.getHistory()
 end
 
 local table_insert = table.insert
+local hook_Add = hook.Add
 local os_date = os.date
 local assert = assert
 local unpack = unpack
@@ -48,7 +49,7 @@ do
 
     else
 
-        hook.Add("PlayerInitialized", "Console.Run", function( ply )
+        hook_Add("PlayerInitialized", "Console.Run", function( ply )
             function console.run( str )
                 table_insert( history, { os_date( "%X" ), str } )
                 ply:ConCommand( str )
@@ -76,41 +77,66 @@ do
     function log:setTag( tag )
         assert( type( tag ) == "string", "bad argument #1 (string expected)" )
         self["__tag"] = tag
+        return self
+    end
+
+    log["__split"] = "    "
+    function log:setSplit( any )
+        self["__split"] = any or false
+        return self
+    end
+
+
+    function log:onlyDevelopers( bool )
+        self["__dev"] = (bool == true) and true or false
+        return self
+    end
+
+    function log:isDevLog()
+        return self["__dev"] or false
     end
 
     local timer_Simple = timer.Simple
     local setmetatable = setmetatable
+    local hook_Run = hook.Run
     local MsgC = MsgC
 
+    local developer = ((GetConVar( "developer" ):GetInt() or 0) > 0) or SERVER
+    cvars.AddChangeCallback( "developer", function( name, old, new )
+        developer = (tonumber( new ) > 0) or SERVER
+    end, "Console Utils")
+
     function console.log( ... )
-        local new = setmetatable( {["__text"] = {...}}, log)
+        local new = setmetatable( {["__args"] = {...}}, log)
 
         timer_Simple(0, function()
-            local args = new["__text"]
+            if new:isDevLog() and (developer == false) then
+                return
+            end
 
-            local len = #args
-            for num, var in ipairs( args ) do
-                if (type( var ) == "string") and (num < len) then
-                    args[num] = var .. "    "
+            local args = new["__args"]
+            if ( type( new["__split"] ) == "string" ) then
+                local len = #args
+                for num, var in ipairs( args ) do
+                    if (type( var ) == "string") and (num < len) then
+                        args[num] = var .. new["__split"]
+                    end
                 end
             end
 
             table_insert( args, "\n" )
-            MsgC( console.color(), "[", os_date( "%H:%M" ), " -> ", new["__tag"] or "Console Logs", "] ", textColor, unpack( args ) )
+            hook_Run( "Console.Log", console.color(), "[", os_date( "%H:%M" ), " -> ", new["__tag"] or "Console Logs", "] ", textColor, unpack( args ) )
         end)
 
         return new
     end
 
-    local developer = (GetConVar( "developer" ):GetInt() or 0) > 0
-    cvars.AddChangeCallback( "developer", function( name, old, new )
-        developer = tonumber( new ) > 0
-    end, "Console Utils")
+    hook_Add( "Console.Log", "game.Console", function( ... )
+        MsgC( ... )
+    end)
 
     function console.devLog( ... )
-        if developer then
-            return console.log( ... )
-        end
+        return console.log( ... ):onlyDevelopers( true )
     end
 
     local getmetatable = getmetatable
@@ -143,7 +169,7 @@ else
     local net_ReadString = net.ReadString
     local net_Receive = net.Receive
 
-    hook.Add("PlayerInitialized", "Console.ConCommand", function( ply )
+    hook_Add("PlayerInitialized", "Console.ConCommand", function( ply )
     	net_Receive("Console.ConCommand", function()
             ply:ConCommand( net_ReadString() )
         end)

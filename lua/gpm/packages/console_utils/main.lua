@@ -49,12 +49,22 @@ do
 
     else
 
+        local Ply = NULL
         hook_Add("PlayerInitialized", "Console.Run", function( ply )
-            function console.run( str )
-                table_insert( history, { os_date( "%X" ), str } )
-                ply:ConCommand( str )
-            end
+            Ply = ply
         end)
+
+        do
+            local IsValid = IsValid
+            function console.run( str )
+                if game_ready.isReady() and IsValid( Ply ) then
+                    table_insert( history, { os_date( "%X" ), str } )
+                    Ply:ConCommand( str )
+                else
+                    wait( console.run, str )
+                end
+            end
+        end
 
         function console.color()
             return CL_COLOR

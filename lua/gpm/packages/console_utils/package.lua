@@ -3,7 +3,8 @@ return {
     description = "A functions for convenient work with Garry's Mod console under from lua.",
     version = "1.0.0",
     dependencies = {
-        ["Base Extensions"] = ">=1.0.0"
+        ["Base Extensions"] = ">=1.0.0",
+        ["Game Ready"] = ">=1.0.0"
     },
     author = "PrikolMen:-b",
     license = "MIT"

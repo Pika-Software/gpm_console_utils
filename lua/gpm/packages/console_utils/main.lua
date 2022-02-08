@@ -80,9 +80,9 @@ do
         return self
     end
 
-    log["__split"] = "    "
+    log["__split"] = nil
     function log:setSeparator( any )
-        self["__split"] = any or false
+        self["__split"] = any
         return self
     end
 

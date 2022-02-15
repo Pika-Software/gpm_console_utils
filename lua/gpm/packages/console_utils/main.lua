@@ -85,7 +85,6 @@ do
     debug.getregistry().ConsoleLog = log
 
     function log:setTag( tag )
-        assert( type( tag ) == "string", "bad argument #1 (string expected)" )
         self["__tag"] = tag
         return self
     end

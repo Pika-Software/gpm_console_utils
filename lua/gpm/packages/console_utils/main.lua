@@ -1,5 +1,5 @@
-SV_COLOR = Color( "#0082ff" )
-CL_COLOR = Color( "#dea909" )
+SV_COLOR = Color( 136, 221, 255, 255 )
+CL_COLOR = Color( 255, 221, 102, 255 )
 
 console = console or {}
 
@@ -134,7 +134,7 @@ do
             end
 
             table_insert( args, "\n" )
-            hook_Run( "Console.Log", console.color(), "[", os_date( "%H:%M" ), " -> ", new["__tag"] or "Console Logs", "] ", textColor, unpack( args ) )
+            hook_Run( new:isDevLog() and "Console.DevLog" or "Console.Log", console.color(), "[", os_date( "%H:%M" ), " -> ", new["__tag"] or "Console Logs", "] ", textColor, unpack( args ) )
         end)
 
         return new
@@ -142,6 +142,10 @@ do
 
     hook_Add( "Console.Log", "game.Console", function( ... )
         MsgC( ... )
+    end)
+
+    hook_Add( "Console.DevLog", "game.Console", function( ... )
+        MsgC( " </> ", ... )
     end)
 
     function console.devLog( ... )

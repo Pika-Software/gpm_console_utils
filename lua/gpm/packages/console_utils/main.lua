@@ -15,6 +15,7 @@ local hook_Add = hook.Add
 local os_date = os.date
 local assert = assert
 local unpack = unpack
+local ipairs = ipairs
 local type = type
 
 do
@@ -163,21 +164,56 @@ end
 	Normal ConCommand's
 ---------------------------------------------------------------------------]]
 
-if SERVER then
-    util.AddNetworkString("Console.ConCommand")
-	local PLAYER = FindMetaTable("Player")
+if (SERVER) then
 
-    local net_WriteString = net.WriteString
-    local net_Start = net.Start
-    local net_Send = net.Send
+    do
 
-    function PLAYER:ConCommand( cmd )
-		if type( cmd ) == "string" then
-			net_Start( "Console.ConCommand" )
-				net_WriteString( cmd )
-			net_Send( self )
-		end
-	end
+        util.AddNetworkString("Console.ConCommand")
+
+        local net_WriteString = net.WriteString
+        local net_Start = net.Start
+        local net_Send = net.Send
+
+        local PLAYER = FindMetaTable("Player")
+        function PLAYER:ConCommand( cmd )
+            if type( cmd ) == "string" then
+                net_Start( "Console.ConCommand" )
+                    net_WriteString( cmd )
+                net_Send( self )
+            end
+        end
+    end
+
+    do
+
+        local cmd_starts = CreateConVar("chat_command_symbols", "/ !", FCVAR_ARCHIVE, " - List of chat commands start symbols"):GetString()
+        if (cmd_starts != nil) then
+            cmd_starts = "/ !"
+        end
+
+        local start_symbols = cmd_starts:Split( " " )
+        hook.Add("PlayerSay", "ChatCommands", function( ply, text, teamChat )
+            for num, start in ipairs( start_symbols ) do
+                if text:StartWith( start ) then
+                    local cmd = text:Replace( start, "" )
+                    local splited = cmd:Split( " " )
+
+                    local args = {}
+                    for num, str in ipairs( splited ) do
+                        if (num == 1) then
+                            continue
+                        end
+
+                        table_insert( args, str )
+                    end
+
+                    return hook.Run( "ChatCommand", ply, splited[1], args, teamChat )
+                end
+            end
+        end)
+
+    end
+
 else
     local net_ReadString = net.ReadString
     local net_Receive = net.Receive

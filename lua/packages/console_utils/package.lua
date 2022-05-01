@@ -1,10 +1,10 @@
-return {
-    name = "Console Utils",
-    description = "A functions for convenient work with Garry's Mod console under from lua.",
-    version = "1.2.0",
-    dependencies = {
-        ["Game Ready"] = ">=1.0.0"
-    },
-    author = "PrikolMen:-b",
-    license = "MIT"
+Name = "Console Utils"
+Description = "A functions for convenient work with Garry's Mod console under from lua."
+
+Author = "PrikolMen:-b"
+Version = "1.2.0"
+License = "MIT"
+
+Dependencies = {
+    ["Game Ready"] = ">=1.0.0"
 }

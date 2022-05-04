@@ -182,6 +182,7 @@ if (SERVER) then
                 net_Send( self )
             end
         end
+
     end
 
     do
